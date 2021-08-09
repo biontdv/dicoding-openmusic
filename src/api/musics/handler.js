@@ -26,7 +26,7 @@ class MusicHanler {
       }).code(201)
       return response
     } catch (error) {
-      if (error.statusCode === 500) {
+      if (h.response.statusCode === 500) {
         return h.response({
           status: 'error',
           message: 'Maaf, terjadi kegagalan pada server kami.'
@@ -91,7 +91,7 @@ class MusicHanler {
 
   async putMusicHandler (request, h) {
     try {
-      // this._validator.validateMusicPayload(request.payload)
+      this._validator.validateMusicPayload(request.payload)
       const { songId } = request.params
       await this._service.editMusicById(songId, request.payload)
       return h.response({
@@ -99,14 +99,16 @@ class MusicHanler {
         message: 'lagu berhasil diperbarui'
       }).code(200)
     } catch (error) {
-    //   if (error.statusCode === 500) {
-    //     return h.response({
-    //       status: 'error',
-    //       message: 'Maaf, terjadi kegagalan pada server kami.'
-    //     })
-    //   }
-    return error.message
-      
+      if (h.response.statusCode === 500) {
+        return h.response({
+          status: 'error',
+          message: 'Maaf, terjadi kegagalan pada server kami.'
+        })
+      }
+      return h.response({
+        status: 'fail',
+        message: error.message
+      }).code(error.statusCode)
     }
   }
 
