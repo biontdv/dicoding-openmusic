@@ -38,28 +38,27 @@ class MusicService {
 
   async getMusicById (id) {
     const query = {
-      text: 'select *from musics where id=$1',
+      text: 'select *from musics where id=$1 return id',
       values: [id]
     }
     const result = await this._pool.query(query)
     if (!result.rows.length) {
       throw new NotFoundError('Music tidak ditemukan')
     }
-    return result.rows
+    return result.rows[0].id
   }
 
   async editMusicById (id, { title, year, performer, genre, duration }) {
     const updatedAt = new Date().toISOString()
     const query = {
-      text: 'update musics set title=$1, year=$2, performer=$3, genre=$4, duration=$5, updatedAt=$6 where id=$7 returning id',
+      text: 'update musics set title=$1, year=$2, performer=$3, genre=$4, duration=$5, "updatedAt"=$6 where id=$7 return id',
       values: [title, year, performer, genre, duration, updatedAt, id]
     }
 
-    const result = await this._pool.query(query)
-    if (!result.rows.length) {
-      throw new NotFoundError('Gagal memperbarui music, Id tidak ditemukan')
-    }
-    return result.rows[0].id
+    await this._pool.query(query)
+    // if (!result.rows.length) {
+    //   throw new InvariantError('Lagu gagal ditambahkan')
+    // }
   }
 
   async deleteMusicById (id) {
@@ -68,7 +67,9 @@ class MusicService {
       values: [id]
     }
     const result = await this._pool.query(query)
-    return result.rows[0].id
+    if (!result.rows.length) {
+      throw new NotFoundError('Music tidak ditemukan')
+    }
   }
 }
 
