@@ -36,18 +36,6 @@ class MusicHanler {
         status: 'fail',
         message: error.message
       }).code(error.statusCode)
-    //   if (error instanceof InvariantError) {
-    //     return h.response({
-    //       status: 'fail'
-    //     }).code(error.statusCode)
-    //   }
-    //   const response = h.response({
-    //     status: 'error',
-    //     message: 'Maaf, terjadi kegagalan pada server kami.'
-    //   })
-    //   response.code(500)
-    //   console.error(error)
-    //   return response
     }
   }
 
