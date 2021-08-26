@@ -34,7 +34,7 @@ const init = async () => {
     plugin: Jwt
   })
 
-  await server.auth.strategy('openmusic_jwt', 'jwt', {
+  server.auth.strategy('openmusic_jwt', 'jwt', {
     keys: process.env.ACCESS_TOKEN_KEY,
     verify: {
       aud: false,
