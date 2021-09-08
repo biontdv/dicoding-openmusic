@@ -20,7 +20,7 @@ exports.up = (pgm) => {
   })
 
   pgm.addConstraint('playlists', 'fk_owner->users.id',
-    'foreign key(owner) references users(id) on delete cascade on update cascade')
+    'foreign key(owner) references users(id) on delete cascade')
 }
 
 exports.down = (pgm) => {

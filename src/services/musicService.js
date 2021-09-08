@@ -9,7 +9,7 @@ class MusicService {
   }
 
   async addMusic ({ title, year, performer, genre, duration }) {
-    const id = nanoid(16)
+    const id = `MSC-${nanoid(16)}`
     const insertedAt = new Date().toISOString()
     const updatedAt = insertedAt
 
