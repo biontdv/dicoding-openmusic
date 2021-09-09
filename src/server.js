@@ -1,6 +1,8 @@
 require('dotenv').config()
 const Hapi = require('@hapi/hapi')
 const Jwt = require('@hapi/jwt')
+const path = require('path')
+const Inert = require('@hapi/inert')
 const musics = require('./api/musics')
 const MusicService = require('./services/musicService')
 const MusicsValidator = require('./validator/')
@@ -20,6 +22,12 @@ const playlistsSongsValidator = require('./validator/playlistsSongs')
 const collaborations = require('./api/collaborations/')
 const collaborationsValidator = require('./validator/collaborator')
 const CollaborationsService = require('./services/CollaborationsService')
+const _Exports = require('./api/exports')
+const ExportsService = require('./services/rabbitmq/ProducerService')
+const ExportValidator = require('./validator/exports')
+const uploads = require('./api/uploads')
+const StorageService = require('./services/StorageService')
+const uploadsValidator = require('./validator/uploads')
 const init = async () => {
   const musicService = new MusicService()
   const authService = new AuthService()
@@ -27,6 +35,7 @@ const init = async () => {
   const playlistsService = new PlaylistsService()
   const playlistsSongsService = new PlaylistsSongsService()
   const collaborationsService = new CollaborationsService()
+  const storageService = new StorageService(path.resolve(__dirname, 'api/uploads/file/picture'))
   const server = Hapi.server({
     port: process.env.PORT,
     host: process.env.HOST,
@@ -37,9 +46,14 @@ const init = async () => {
     }
   })
 
-  await server.register({
-    plugin: Jwt
-  })
+  await server.register([
+    {
+      plugin: Jwt
+    },
+    {
+      plugin: Inert
+    }
+  ])
 
   server.auth.strategy('openmusic_jwt', 'jwt', {
     keys: process.env.ACCESS_TOKEN_KEY,
@@ -98,6 +112,21 @@ const init = async () => {
         service: collaborationsService,
         validator: collaborationsValidator,
         playlistService: playlistsService
+      }
+    },
+    {
+      plugin: _Exports,
+      options: {
+        service: ExportsService,
+        playlistsService,
+        validator: ExportValidator
+      }
+    },
+    {
+      plugin: uploads,
+      options: {
+        service: storageService,
+        validator: uploadsValidator
       }
     }
 
