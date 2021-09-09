@@ -1,3 +1,4 @@
+const path = require('path')
 
 const routes = (handler) => [
   {
@@ -8,7 +9,17 @@ const routes = (handler) => [
       payload: {
         allow: 'multipart/form-data',
         multipart: true,
-        output: 'stream'
+        output: 'stream',
+        maxBytes: 500000
+      }
+    }
+  },
+  {
+    method: 'GET',
+    path: '/upload/{params*}',
+    handler: {
+      directory: {
+        path: path.resolve(__dirname, 'file/pictures')
       }
     }
   }

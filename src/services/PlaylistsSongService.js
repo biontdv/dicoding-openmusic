@@ -3,8 +3,9 @@ const { nanoid } = require('nanoid')
 const InvariantError = require('../exceptions/InvariantError')
 
 class PlaylistsSongService {
-  constructor () {
+  constructor (cacheService) {
     this._pool = new Pool()
+    this._cacheService = cacheService
   }
 
   async addPlaylistsSong (songId, playlistId) {
@@ -14,16 +15,22 @@ class PlaylistsSongService {
       values: [id, playlistId, songId]
     }
     await this._pool.query(query)
+    await this._cacheService.deleteCache(`playlist:${playlistId}`)
   }
 
   async getPlaylistsSongs (playlistId) {
-    const query = {
-      text: 'select b.id,b.title,b.performer from "playlistsSongs" a join musics b on a."musicId"=b.id where a."playlistsId"=$1',
-      values: [playlistId]
+    try {
+      const result = await this._cacheService.getCache(`playlist:${playlistId}`)
+      return JSON.parse(result)
+    } catch (error) {
+      const query = {
+        text: 'select b.id,b.title,b.performer from "playlistsSongs" a join musics b on a."musicId"=b.id where a."playlistsId"=$1',
+        values: [playlistId]
+      }
+      const result = await this._pool.query(query)
+      await this._cacheService.setCache(`playlist:${playlistId}`, JSON.stringify(result.rows))
+      return result.rows
     }
-    const result = await this._pool.query(query)
-
-    return result.rows
   }
 
   async deletePlaylistsSongs (musicId, playlistId) {
@@ -35,6 +42,7 @@ class PlaylistsSongService {
     if (!result.rowCount) {
       throw new InvariantError('gagal menghapus lagu')
     }
+    await this._cacheService.deleteCache(`playlist:${playlistId}`)
   }
 }
 

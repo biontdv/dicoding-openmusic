@@ -11,8 +11,9 @@ class CollaborationsHandler {
 
   async postCollaborationsHandler (request, h) {
     try {
-      this._validator.collaborationsValidate(request.payload)
       const { playlistId, userId } = request.payload
+      console.log(userId)
+      this._validator.collaborationsValidate(request.payload)
       const { id: owner } = request.auth.credentials
       await this._playlistsService.getPlaylistsByOwner(playlistId, owner)
       const collaborationId = await this._service.addCollaborator(playlistId, userId)
